@@ -4,6 +4,9 @@
 # to CMake developers:  Add a COMPILE_FLAGS_<CONFIG> target property, or
 # better yet, provide a friendly way of configuring a Windows target to use the
 # static C library.
+if (NOT LIBJPEGTURBO_DEBUG_POSTFIX)
+  set(LIBJPEGTURBO_DEBUG_POSTFIX d)
+endif()
 
 if(MSVC)
   # Build all configurations against shared C library
@@ -31,8 +34,8 @@ else()
   add_library(jpeg SHARED ${JPEG_SRCS} ${SIMD_OBJS}
     ${CMAKE_SOURCE_DIR}/win/jpeg${DLL_VERSION}.def)
 endif()
-set_target_properties(jpeg PROPERTIES SOVERSION ${DLL_VERSION}
-  VERSION ${FULLVERSION})
+set_target_properties(jpeg PROPERTIES SOVERSION ${DLL_VERSION} VERSION ${FULLVERSION} 
+  DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
 if(MSVC)
   set_target_properties(jpeg PROPERTIES SUFFIX ${DLL_VERSION}.dll)
 elseif(MINGW OR CYGWIN)
@@ -53,19 +56,23 @@ endif()
 add_executable(cjpeg ../cjpeg.c ../cdjpeg.c ../rdgif.c ../rdppm.c
   ../rdswitch.c ${CJPEG_BMP_SOURCES})
 set_property(TARGET cjpeg PROPERTY COMPILE_FLAGS ${COMPILE_FLAGS})
+set_target_properties(cjpeg PROPERTIES DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
 target_link_libraries(cjpeg jpeg)
 
 add_executable(djpeg ../djpeg.c ../cdjpeg.c ../rdcolmap.c ../rdswitch.c
   ../wrgif.c ../wrppm.c ${DJPEG_BMP_SOURCES})
 set_property(TARGET djpeg PROPERTY COMPILE_FLAGS ${COMPILE_FLAGS})
+set_target_properties(djpeg PROPERTIES DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
 target_link_libraries(djpeg jpeg)
 
 add_executable(jpegtran ../jpegtran.c ../cdjpeg.c ../rdswitch.c ../transupp.c)
 target_link_libraries(jpegtran jpeg)
 set_property(TARGET jpegtran PROPERTY COMPILE_FLAGS "-DUSE_SETMODE")
+set_target_properties(jpegtran PROPERTIES DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
 
 add_executable(jcstest ../jcstest.c)
 target_link_libraries(jcstest jpeg)
+set_target_properties(jcstest PROPERTIES DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
 
 install(TARGETS jpeg cjpeg djpeg jpegtran
   ARCHIVE DESTINATION lib

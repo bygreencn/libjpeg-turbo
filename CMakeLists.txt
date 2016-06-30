@@ -49,6 +49,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(BUILD "${BUILD}d")
 endif()
 
+set(LIBJPEGTURBO_DEBUG_POSTFIX d)
+
 message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
 
 option(WITH_SIMD "Include SIMD extensions" TRUE)
@@ -255,12 +257,14 @@ endif()
 
 if(ENABLE_STATIC OR WITH_TURBOJPEG)
   add_library(jpeg-static STATIC ${JPEG_SOURCES} ${SIMD_OBJS})
+  
   if(NOT MSVC)
     set_target_properties(jpeg-static PROPERTIES OUTPUT_NAME jpeg)
   endif()
   if(WITH_SIMD)
     add_dependencies(jpeg-static simd)
   endif()
+  set_target_properties(jpeg-static PROPERTIES DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
 endif()
 
 if(WITH_TURBOJPEG)
@@ -278,15 +282,18 @@ if(WITH_TURBOJPEG)
     endif()
     target_link_libraries(turbojpeg jpeg-static)
     set_target_properties(turbojpeg PROPERTIES LINK_INTERFACE_LIBRARIES "")
+    set_target_properties(turbojpeg PROPERTIES DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
 
     add_executable(tjunittest tjunittest.c tjutil.c)
     target_link_libraries(tjunittest turbojpeg)
+    set_target_properties(tjunittest PROPERTIES DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
 
     add_executable(tjbench tjbench.c bmp.c tjutil.c rdbmp.c rdppm.c wrbmp.c
       wrppm.c)
     target_link_libraries(tjbench turbojpeg jpeg-static)
     set_property(TARGET tjbench PROPERTY COMPILE_FLAGS
       "-DBMP_SUPPORTED -DPPM_SUPPORTED")
+    set_target_properties(tjbench PROPERTIES DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
   endif()
 
   if(ENABLE_STATIC)
@@ -298,15 +305,18 @@ if(WITH_TURBOJPEG)
     if(WITH_SIMD)
       add_dependencies(turbojpeg-static simd)
     endif()
-
+    set_target_properties(turbojpeg-static PROPERTIES DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
+    
     add_executable(tjunittest-static tjunittest.c tjutil.c)
     target_link_libraries(tjunittest-static turbojpeg-static)
+    set_target_properties(tjunittest-static PROPERTY DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
 
     add_executable(tjbench-static tjbench.c bmp.c tjutil.c rdbmp.c rdppm.c
       wrbmp.c wrppm.c)
     target_link_libraries(tjbench-static turbojpeg-static jpeg-static)
     set_property(TARGET tjbench-static PROPERTY COMPILE_FLAGS
       "-DBMP_SUPPORTED -DPPM_SUPPORTED")
+    set_target_properties(tjbench-static PROPERTY DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
   endif()
 endif()
 
@@ -321,22 +331,24 @@ endif()
 if(ENABLE_STATIC)
   add_executable(cjpeg-static cjpeg.c cdjpeg.c rdgif.c rdppm.c rdswitch.c
     ${CJPEG_BMP_SOURCES})
-  set_property(TARGET cjpeg-static PROPERTY COMPILE_FLAGS ${COMPILE_FLAGS})
+  set_property(TARGET cjpeg-static PROPERTY COMPILE_FLAGS ${COMPILE_FLAGS} DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
   target_link_libraries(cjpeg-static jpeg-static)
 
   add_executable(djpeg-static djpeg.c cdjpeg.c rdcolmap.c rdswitch.c wrgif.c
     wrppm.c ${DJPEG_BMP_SOURCES})
-  set_property(TARGET djpeg-static PROPERTY COMPILE_FLAGS ${COMPILE_FLAGS})
+  set_property(TARGET djpeg-static PROPERTY COMPILE_FLAGS ${COMPILE_FLAGS} DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
   target_link_libraries(djpeg-static jpeg-static)
 
   add_executable(jpegtran-static jpegtran.c cdjpeg.c rdswitch.c transupp.c)
   target_link_libraries(jpegtran-static jpeg-static)
-  set_property(TARGET jpegtran-static PROPERTY COMPILE_FLAGS "-DUSE_SETMODE")
+  set_property(TARGET jpegtran-static PROPERTY COMPILE_FLAGS "-DUSE_SETMODE" DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
 endif()
 
 add_executable(rdjpgcom rdjpgcom.c)
+set_property(TARGET rdjpgcom PROPERTY DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
 
 add_executable(wrjpgcom wrjpgcom.c)
+set_property(TARGET wrjpgcom PROPERTY DEBUG_POSTFIX "${LIBJPEGTURBO_DEBUG_POSTFIX}")
 
 
 #
